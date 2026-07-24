@@ -4,6 +4,7 @@
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::events;
     use soroban_sdk::{testutils::Address as TestAddress, testutils::Events, Env, Symbol};
 
     fn verify_event_structure(
@@ -25,7 +26,7 @@ mod tests {
     fn bond_created_v2_schema_matches() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_created_v2(&e, &addr, 1000i128, 3600u64, false, e.ledger().timestamp());
+        events::emit_bond_created_v2(&e, &addr, 1000i128, 3600u64, false, e.ledger().timestamp());
         let events = e.events().get_all();
         // Topics: bond_created_v2, Address, i128, u64 (4)
         // Data: u64, bool, u64 (3)
@@ -36,7 +37,7 @@ mod tests {
     fn bond_created_v1_schema_matches() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_created(&e, &addr, 1000i128, 3600u64, false);
+        events::emit_bond_created(&e, &addr, 1000i128, 3600u64, false);
         let events = e.events().get_all();
         // Topics: bond_created, Address (2)
         // Data: i128, u64, bool (3)
@@ -47,7 +48,7 @@ mod tests {
     fn bond_increased_v2_schema_matches() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_increased_v2(
+        events::emit_bond_increased_v2(
             &e,
             &addr,
             500i128,
@@ -66,7 +67,7 @@ mod tests {
     fn bond_increased_v1_schema_matches() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_increased(&e, &addr, 500i128, 1500i128);
+        events::emit_bond_increased(&e, &addr, 500i128, 1500i128);
         let events = e.events().get_all();
         // Topics: bond_increased, Address (2)
         // Data: i128, i128 (2)
@@ -77,7 +78,7 @@ mod tests {
     fn bond_withdrawn_v2_schema_matches() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_withdrawn_v2(
+        events::emit_bond_withdrawn_v2(
             &e,
             &addr,
             200i128,
@@ -96,7 +97,7 @@ mod tests {
     fn bond_withdrawn_v1_schema_matches() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_withdrawn(&e, &addr, 200i128, 800i128);
+        events::emit_bond_withdrawn(&e, &addr, 200i128, 800i128);
         let events = e.events().get_all();
         // Topics: bond_withdrawn, Address (2)
         // Data: i128, i128 (2)
@@ -108,7 +109,7 @@ mod tests {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
         let admin = TestAddress::generate(&e);
-        emit_bond_slashed_v2(
+        events::emit_bond_slashed_v2(
             &e,
             &addr,
             100i128,
@@ -128,7 +129,7 @@ mod tests {
     fn bond_slashed_v1_schema_matches() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_slashed(&e, &addr, 100i128, 100i128);
+        events::emit_bond_slashed(&e, &addr, 100i128, 100i128);
         let events = e.events().get_all();
         // Topics: bond_slashed, Address (2)
         // Data: i128, i128 (2)
@@ -140,7 +141,7 @@ mod tests {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
         let admin = TestAddress::generate(&e);
-        emit_bond_liquidated(
+        events::emit_bond_liquidated(
             &e,
             &addr,
             50i128,
@@ -158,7 +159,7 @@ mod tests {
     fn param_updated_schema_matches() {
         let e = Env::default();
         let admin = TestAddress::generate(&e);
-        emit_parameter_updated(
+        events::emit_parameter_updated(
             &e,
             Symbol::new(&e, "leverage"),
             Symbol::new(&e, "risk"),
@@ -177,7 +178,7 @@ mod tests {
         let e = Env::default();
         let executor = TestAddress::generate(&e);
         let new_impl = TestAddress::generate(&e);
-        emit_upgrade_executed(&e, &executor, &new_impl, Some(42u64));
+        events::emit_upgrade_executed(&e, &executor, &new_impl, Some(42u64));
         let events = e.events().get_all();
         // Topics: upgrade_executed, Address (2)
         // Data: Address, Option<u64> (2)
@@ -196,7 +197,7 @@ mod tests {
             attestation_count: 5u32,
             attestation_list_len: 5u32,
         };
-        emit_bond_drift_detected(&e, &details);
+        events::emit_bond_drift_detected(&e, &details);
         let events = e.events().get_all();
         // Topics: bond_drift_detected, Address (2)
         // Data: BondDriftKind, i128, i128, u32, u32 (5)
@@ -208,7 +209,7 @@ mod tests {
     fn schema_change_detection_topics_fails() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_created_v2(&e, &addr, 1000i128, 3600u64, false, e.ledger().timestamp());
+        events::emit_bond_created_v2(&e, &addr, 1000i128, 3600u64, false, e.ledger().timestamp());
         let events = e.events().get_all();
         // This should fail because we're asserting wrong topic length
         verify_event_structure(&events, 99, 3);
@@ -219,7 +220,7 @@ mod tests {
     fn schema_change_detection_data_fails() {
         let e = Env::default();
         let addr = TestAddress::generate(&e);
-        emit_bond_created_v2(&e, &addr, 1000i128, 3600u64, false, e.ledger().timestamp());
+        events::emit_bond_created_v2(&e, &addr, 1000i128, 3600u64, false, e.ledger().timestamp());
         let events = e.events().get_all();
         // This should fail because we're asserting wrong data length
         verify_event_structure(&events, 4, 99);
