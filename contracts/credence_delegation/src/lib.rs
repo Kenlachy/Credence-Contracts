@@ -1042,3 +1042,6 @@ mod test_verifier_dispatch;
 
 #[cfg(test)]
 mod test_auth;
+
+#[cfg(test)]
+mod test_events_schema;
